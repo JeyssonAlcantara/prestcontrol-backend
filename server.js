@@ -18,17 +18,24 @@ app.get("/", (req, res) => {
 // Ruta para enviar notificación
 app.get("/enviar", async (req, res) => {
   try {
+    const cantidad = Number(req.query.cantidad || 0);
+
+    const body =
+      cantidad > 0
+        ? `Tienes ${cantidad} cobro${cantidad === 1 ? "" : "s"} pendiente${cantidad === 1 ? "" : "s"} hoy`
+        : "Revisa tus cobros pendientes de hoy";
+
     const message = {
       notification: {
-        title: "💰 Cobro pendiente",
-        body: "Tienes clientes que deben pagar hoy",
+        title: "💰 PrestControl",
+        body: body,
       },
       topic: "todos",
     };
 
     await admin.messaging().send(message);
 
-    return res.status(200).send("OK"); // 🔥 respuesta mínima
+    return res.status(200).send("OK");
   } catch (error) {
     console.error(error);
     return res.status(500).send("ERROR");
