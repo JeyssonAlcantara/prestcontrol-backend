@@ -1,52 +1,43 @@
 const express = require("express");
 const admin = require("firebase-admin");
-const cors = require("cors");
 
 const app = express();
-app.use(cors());
-app.use(express.json());
 
-// 🔑 luego pondremos la clave aquí
-const serviceAccount = require("./serviceAccountKey.json");
+// 🔐 Leer clave desde variable de entorno
+const serviceAccount = JSON.parse(process.env.FIREBASE_KEY);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
+// Ruta base (para probar que funciona)
 app.get("/", (req, res) => {
   res.send("Servidor funcionando 🚀");
 });
 
+// Ruta para enviar notificación
 app.get("/enviar", async (req, res) => {
   try {
-    const snapshot = await admin.firestore().collection("tokens").get();
-
-    const tokens = [];
-
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      if (data.token) {
-        tokens.push(data.token);
-      }
-    });
-
     const message = {
       notification: {
         title: "💰 Cobro pendiente",
         body: "Tienes clientes que deben pagar hoy",
       },
-      tokens: tokens,
+      topic: "todos",
     };
 
-    const response = await admin.messaging().sendEachForMulticast(message);
+    await admin.messaging().send(message);
 
-    res.send(`Enviadas: ${response.successCount}`);
+    res.send("Notificación enviada 🚀");
   } catch (error) {
     console.error(error);
-    res.status(500).send("Error");
+    res.status(500).send("Error enviando notificación");
   }
 });
 
-app.listen(3000, () => {
-  console.log("Servidor corriendo en http://localhost:3000");
+// ⚠️ IMPORTANTE: usar el puerto de Render
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en puerto ${PORT}`);
 });
