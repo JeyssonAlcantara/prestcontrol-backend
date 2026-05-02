@@ -28,10 +28,10 @@ app.get("/enviar", async (req, res) => {
 
     await admin.messaging().send(message);
 
-    res.send("Notificación enviada 🚀");
+    return res.status(200).send("OK"); // 🔥 respuesta mínima
   } catch (error) {
     console.error(error);
-    res.status(500).send("Error enviando notificación");
+    return res.status(500).send("ERROR");
   }
 });
 
