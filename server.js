@@ -28,7 +28,7 @@ app.get("/enviar", async (req, res) => {
 
     await admin.messaging().send(message);
 
-    return res.status(200).send("OK");
+    return res.status(200).send();
   } catch (error) {
     console.error(error);
     return res.status(500).send("ERROR");
