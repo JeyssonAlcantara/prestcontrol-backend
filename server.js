@@ -15,6 +15,10 @@ app.get("/", (req, res) => {
   res.send("Servidor funcionando 🚀");
 });
 
+app.get("/ping", (req, res) => {
+  return res.status(204).end();
+});
+
 // Ruta para enviar notificación
 app.get("/enviar", async (req, res) => {
   try {
@@ -31,7 +35,7 @@ app.get("/enviar", async (req, res) => {
     return res.status(204).end();
   } catch (error) {
     console.error(error);
-    return res.status(500).send("ERROR");
+    return res.status(500).end();
   }
 });
 
