@@ -3,43 +3,52 @@ const admin = require("firebase-admin");
 
 const app = express();
 
-// 🔐 Leer clave desde variable de entorno
 const serviceAccount = JSON.parse(process.env.FIREBASE_KEY);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
-// Ruta base (para probar que funciona)
+// Respuesta limpia para probar servidor
 app.get("/", (req, res) => {
-  res.send("Servidor funcionando 🚀");
+  return res
+    .status(200)
+    .type("text/plain")
+    .send("OK");
 });
 
+// Ruta limpia para mantener Render despierto
 app.get("/ping", (req, res) => {
-  return res.status(204).end();
+  return res
+    .status(200)
+    .type("text/plain")
+    .send("OK");
 });
 
-// Ruta para enviar notificación
-app.get("/enviar", async (req, res) => {
-  try {
-    const message = {
-      notification: {
-        title: "💰 PrestControl",
-        body: "Revisa tus cobros de hoy",
-      },
-      topic: "todos",
-    };
+// Ruta para cron-job: responde rápido y luego manda notificación
+app.get("/enviar", (req, res) => {
+  res
+    .status(200)
+    .type("text/plain")
+    .send("OK");
 
-    await admin.messaging().send(message);
+  setImmediate(async () => {
+    try {
+      await admin.messaging().send({
+        notification: {
+          title: "💰 PrestControl",
+          body: "Revisa tus cobros de hoy",
+        },
+        topic: "todos",
+      });
 
-    return res.status(204).end();
-  } catch (error) {
-    console.error(error);
-    return res.status(500).end();
-  }
+      console.log("Notificación enviada correctamente");
+    } catch (error) {
+      console.error("Error enviando notificación:", error);
+    }
+  });
 });
 
-// ⚠️ IMPORTANTE: usar el puerto de Render
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
