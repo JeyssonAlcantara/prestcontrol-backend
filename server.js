@@ -9,28 +9,20 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
-// Respuesta limpia para probar servidor
 app.get("/", (req, res) => {
-  return res
-    .status(200)
-    .type("text/plain")
-    .send("OK");
+  return res.status(204).end();
 });
 
-// Ruta limpia para mantener Render despierto
 app.get("/ping", (req, res) => {
-  return res
-    .status(200)
-    .type("text/plain")
-    .send("OK");
+  return res.status(204).end();
 });
 
-// Ruta para cron-job: responde rápido y luego manda notificación
+app.head("/ping", (req, res) => {
+  return res.status(204).end();
+});
+
 app.get("/enviar", (req, res) => {
-  res
-    .status(200)
-    .type("text/plain")
-    .send("OK");
+  res.status(200).type("text/plain").send("OK");
 
   setImmediate(async () => {
     try {
